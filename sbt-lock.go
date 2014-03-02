@@ -38,6 +38,7 @@ func formatDeps(updateOutput string) string {
 	libRegexp := regexp.MustCompile(`^\[info\]\s+([^:\s]+):([^:\s]+):([^:\s]+):`)
 
 	// map を使って unique な LibraryVersion 一覧を得るよ
+	// Set が無いって辛い
 	versionsMap := make(map[LibraryVersion]bool)
 	lines := strings.Split(updateOutput, "\n")
 	for _, line := range lines {

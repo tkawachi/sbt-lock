@@ -12,7 +12,7 @@ import "strings"
 var LockFileName = "lock.sbt"
 
 type LibraryVersion struct {
-	group string
+	group    string
 	artifact string
 	revision string
 }
@@ -63,7 +63,7 @@ func formatDeps(updateOutput string) string {
 	for i, versionLine := range versionLines {
 		buf.WriteString("  ")
 		buf.WriteString(versionLine)
-		if i != len(versionLines) - 1 {
+		if i != len(versionLines)-1 {
 			buf.WriteString(",")
 		}
 		buf.WriteString("\n")
@@ -71,7 +71,6 @@ func formatDeps(updateOutput string) string {
 	buf.WriteString(")\n")
 	return buf.String()
 }
-
 
 func main() {
 	updateOutput := sbtUpdate()

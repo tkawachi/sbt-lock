@@ -9,17 +9,16 @@ import "regexp"
 import "sort"
 import "strings"
 
-var LockFileName = "lock.sbt"
+var LockFileName = "sbt-lock.sbt"
 
-type LibraryVersion struct {
+type Artifact struct {
 	group    string
 	artifact string
-	revision string
 }
 
-func (version *LibraryVersion) format() string {
+func (version *Artifact) format(revision string) string {
 	return fmt.Sprintf("\"%s\" %% \"%s\" %% \"%s\"",
-		version.group, version.artifact, version.revision)
+		version.group, version.artifact, revision)
 }
 
 // sbt 'show update' を実行するよ
@@ -37,23 +36,45 @@ func formatDeps(updateOutput string) string {
 	// [info]          com.github.nscala-time:nscala-time_2.10:0.6.0: (Artifact(...
 	libRegexp := regexp.MustCompile(`^\[info\]\s+([^:\s]+):([^:\s]+):([^:\s]+):`)
 
-	// map を使って unique な LibraryVersion 一覧を得るよ
-	// Set が無いって辛い
-	versionsMap := make(map[LibraryVersion]bool)
+	// Artifact -> revision の map を作るよ
+	revisionMap := make(map[Artifact]string)
 	lines := strings.Split(updateOutput, "\n")
 	for _, line := range lines {
 		match := libRegexp.FindStringSubmatch(line)
 		if match != nil {
-			version := LibraryVersion{match[1], match[2], match[3]}
-			versionsMap[version] = true
+			artifact := Artifact{match[1], match[2]}
+			revision := match[3]
+			if revisionMap[artifact] != "" && revisionMap[artifact] != revision {
+				// 複数の revision に依存がある場合にここにくる。
+				// compile と test (configuration って呼ぶの？)で
+				// 違うバージョンに依存している場合などに起こるみたい?
+				//
+				// dependencyOverrides では configuration 毎の指定は
+				// 効かないような...
+				// とりあえず新しい revision を指定することにするけど、
+				// 元のビルドと異なる部分が出てくるので注意。
+				rev1 := revisionMap[artifact]
+				rev2 := revision
+
+				// 本当は文字列の大小比較じゃだめだよね。
+				if rev1 > rev2 {
+					revision = rev1
+				} else {
+					revision = rev2
+				}
+				log.Printf(
+					"%v: multiple revision exists: %s, %s. %s is selected.\n",
+					artifact, rev1, rev2, revision)
+			}
+			revisionMap[artifact] = revision
 		}
 	}
 
 	// % で区切られた文字列にしてからソート
-	versionLines := make([]string, len(versionsMap))
+	versionLines := make([]string, len(revisionMap))
 	i := 0
-	for version, _ := range versionsMap {
-		versionLines[i] = version.format()
+	for artifact, revision := range revisionMap {
+		versionLines[i] = artifact.format(revision)
 		i += 1
 	}
 	sort.Strings(versionLines)

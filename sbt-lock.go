@@ -17,7 +17,7 @@ type Artifact struct {
 }
 
 func (version *Artifact) format(revision string) string {
-	return fmt.Sprintf("\"%s\" %% \"%s\" %% \"%s\"",
+	return fmt.Sprintf(`"%s" %% "%s" %% "%s"`,
 		version.group, version.artifact, revision)
 }
 

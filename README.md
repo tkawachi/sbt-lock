@@ -41,9 +41,9 @@ sbt で `show update` すると現在利用中のリビジョンが出るので�
 上の例でいう `libA`, `libB` について `dependencyOverrides` を指定する。
 
 幸い `.sbt` という拡張子がついてさえいれば sbt は読み込んでくれるので、
-`sbt-lock.sbt` といった別ファイルで `dependencyOverrides` を指定する。
+`lock.sbt` といった別ファイルで `dependencyOverrides` を指定する。
 
-`sbt-lock.sbt` は VCS に入れて管理する。
+`lock.sbt` は VCS に入れて管理する。
 
 これでうまくいくのではなかろうか。
 
@@ -55,10 +55,10 @@ sbt で `show update` すると現在利用中のリビジョンが出るので�
 
 * `sbt "show update"` を実行
 * 実行結果から現在利用中のリビジョンを抜き出す
-* `sbt-lock.sbt` に `dependencyOverrides` として書き出す
+* `lock.sbt` に `dependencyOverrides` として書き出す
 
 
-`go run sbt-lock.go` で `sbt-lock.sbt` が作られる。
+`go run sbt-lock.go` で `lock.sbt` が作られる。
 
 なんとなく動いてそう。
 

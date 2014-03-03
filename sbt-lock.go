@@ -9,7 +9,7 @@ import "regexp"
 import "sort"
 import "strings"
 
-var LockFileName = "sbt-lock.sbt"
+var LockFileName = "lock.sbt"
 
 type Artifact struct {
 	group    string

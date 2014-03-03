@@ -65,4 +65,5 @@ sbt で `show update` すると現在利用中のリビジョンが出るので�
 ## 課題
 
 * `libraryDependencies` に書かれた revision を上書きするため、新しいバージョンを使うときには `libraryDependencies` だけではなく、`dependencyOverrides`も更新する必要がある。
-* sbt の plugin にしたいが書き方がわからない。だれか教えてください…
+* プロトタイプはGo言語で書いてしまったが、本当は scala で書いて sbt の plugin にしたい。
+  でも書き方がわからない。だれか教えてください…

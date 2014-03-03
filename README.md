@@ -25,7 +25,8 @@ sbt で `libraryDependencies` を書く際には ivy 由来の緩い書き方が
 
 実際のところ[metrics-scala](https://github.com/erikvanoosten/metrics-scala)を
 使っていて、akka への依存が`[2.2,)`という形で書かれており「あれー、おかしいな」となったことがある。
-（[修正が行われたコミット](https://github.com/erikvanoosten/metrics-scala/commit/3ef0db723b35b97691b0abbe1ca16b1ddb10b7bb#diff-fdc3abdfd754eeb24090dbd90aeec2ceL30)）
+（[この投稿](https://groups.google.com/d/msg/metrics-user/nkKQPF4dkL0/w_6skRwILPAJ)と同じ問題。
+[修正が行われたコミット](https://github.com/erikvanoosten/metrics-scala/commit/3ef0db723b35b97691b0abbe1ca16b1ddb10b7bb#diff-fdc3abdfd754eeb24090dbd90aeec2ceL30)）
 
 ## アイデア
 

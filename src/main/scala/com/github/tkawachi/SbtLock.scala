@@ -4,21 +4,12 @@ import sbt._
 import sbt.Keys._
 import java.io.PrintWriter
 
-object SbtLock extends Plugin {
-  val lockFile = settingKey[File]("A version locking file.")
-  val lock = taskKey[Unit]("Create a version locking file.")
-  val unlock = taskKey[Unit]("Remove a version locking file.")
+object SbtLock {
 
   case class Artifact(organization: String, name: String) {
     def sbtString(revision: String) =
       Seq(organization, name, revision).map("\"" + _ + "\"").mkString(" % ")
   }
-
-  override val projectSettings = Seq(
-    lockFile := baseDirectory {_ / "lock.sbt"}.value,
-    lock := doLock(update.value.allModules, lockFile.value),
-    unlock := lockFile.value.delete()
-  )
 
   def doLock(allModules: Seq[ModuleID], outputFile: File): Unit = {
     val revisionsMap: Map[Artifact, Set[String]] =

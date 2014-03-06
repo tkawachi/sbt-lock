@@ -2,7 +2,6 @@ package com.github.tkawachi
 
 import sbt._
 import sbt.Keys._
-import java.io.PrintWriter
 
 object SbtLock {
 
@@ -27,10 +26,7 @@ object SbtLock {
     moduleLines +
     "\n)\n"
 
-    val writer = new PrintWriter(outputFile)
-    try writer.write(dependencyOverrides) finally {
-      writer.close()
-    }
+    IO.write(outputFile, dependencyOverrides)
   }
 
   def chooseRevision(artifact: Artifact, revisions: Set[String]): String = {

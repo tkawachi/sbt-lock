@@ -10,7 +10,11 @@ object SbtLockPlugin extends Plugin {
 
   override val projectSettings = Seq(
     lockFile := baseDirectory {_ / "lock.sbt"}.value,
-    lock := SbtLock.doLock(update.value.allModules, lockFile.value),
-    unlock := lockFile.value.delete()
+    lock := SbtLock.doLock(update.value.allModules, lockFile.value, streams.value),
+    unlock := {
+      val f = lockFile.value
+      val deleted = f.delete()
+      if (deleted) streams.value.log.info(s"$f was deleted.")
+    }
   )
 }

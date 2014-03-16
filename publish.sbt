@@ -2,6 +2,8 @@ import SonatypeKeys._
 
 sonatypeSettings
 
+releaseSettings
+
 pomExtra := {
   <url>https://github.com/tkawachi/sbt-lock/</url>
   <developers>

@@ -2,8 +2,9 @@ package com.github.tkawachi
 
 import sbt._
 import sbt.Keys._
+import org.apache.maven.artifact.versioning.ComparableVersion
 
-private object SbtLock {
+object SbtLock {
 
   case class Artifact(organization: String, name: String) {
     def sbtString(revision: String) =
@@ -40,6 +41,6 @@ private object SbtLock {
     }
   }
 
-  // FIXME
-  def latest(revisions: Set[String]): String = revisions.max
+  def latest(revisions: Set[String]): String = revisions.maxBy(new ComparableVersion(_))
+
 }

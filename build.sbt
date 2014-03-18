@@ -11,6 +11,8 @@ scmInfo := Some(ScmInfo(
   "scm:git:github.com:tkawachi/sbt-lock.git"
 ))
 
+libraryDependencies += "org.apache.maven" % "maven-artifact" % "3.2.1" exclude("org.codehaus.plexus", "plexus-utils")
+
 scalacOptions ++= Seq(
   "-deprecation"
 )

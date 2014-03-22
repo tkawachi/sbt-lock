@@ -6,7 +6,7 @@ It makes builds more stable and reproducible.
 
 Create `~/.sbt/0.13/plugins/sbt-lock.sbt` with following content.
 
-    addSbtPlugin("com.github.tkawachi" % "sbt-lock" % "0.1.0")
+    addSbtPlugin("com.github.tkawachi" % "sbt-lock" % "0.1.1")
 
 * `lock` to create `lock.sbt` file.
   `lock.sbt` includes `depnedencyOverrides` for all dependent library versions.

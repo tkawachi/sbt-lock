@@ -1,7 +1,7 @@
 # sbt-lock
 
 A sbt plugin to create `lock.sbt` file which explicitly specifies
-versions of all dependent libraries.
+versions of all dependent libraries by `dependencyOverrides`.
 It makes builds more stable and reproducible.
 
 Create `~/.sbt/0.13/plugins/sbt-lock.sbt` with following content.

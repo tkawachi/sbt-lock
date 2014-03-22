@@ -6,7 +6,7 @@ versions of all dependent libraries.
 Your application or dependent libraries might contain loose version
 dependencies, like `[1.0,)` (means version 1.0 or later),
 `latest.release`, etc.
-In this case, builds might become different by newer release of
+In this case, builds might become different by a newer release of
 dependent libraries.
 
 This plugin strictly specifies versions by `dependencyOverrides`.

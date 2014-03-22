@@ -9,7 +9,7 @@ object SbtLockPlugin extends Plugin {
   val unlock = taskKey[Unit]("Remove a version locking file.")
 
   override val projectSettings = Seq(
-    lockFile := baseDirectory {_ / "lock.sbt"}.value,
+    lockFile := baseDirectory { _ / "lock.sbt" }.value,
     lock := SbtLock.doLock(update.value.allModules, lockFile.value, streams.value),
     unlock := {
       val f = lockFile.value

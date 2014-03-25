@@ -33,7 +33,7 @@ object SbtLock {
         "\n)\n"
 
     IO.write(outputFile, dependencyOverrides)
-    s.log.info(s"$outputFile was created.")
+    s.log.info(s"$outputFile was created. Commit it to version control system.")
   }
 
   def chooseRevision(artifact: Artifact, revisions: Map[String, Set[String]], s: TaskStreams): String = {

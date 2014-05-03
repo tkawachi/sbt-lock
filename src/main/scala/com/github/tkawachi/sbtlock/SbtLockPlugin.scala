@@ -1,4 +1,4 @@
-package com.github.tkawachi
+package com.github.tkawachi.sbtlock
 
 import sbt._
 import sbt.Keys._

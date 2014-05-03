@@ -41,7 +41,10 @@ object SbtLockPlugin extends Plugin {
               case Some(Value(report)) => report.allModules.filterNot(isDefinedModule)
               case _ => Seq.empty
             }
-        }.toList
+        }
+          // Exclude dependencies in scala-tool configuration
+          .filterNot(_.configurations.exists(_ == "scala-tool"))
+          .toList
 
         SbtLock.doLock(allModules, lockFile, state.log)
 

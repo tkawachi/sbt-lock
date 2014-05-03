@@ -1,8 +1,27 @@
-import SonatypeKeys._
+import sbtrelease._
+import ReleaseStateTransformations._
 
 sonatypeSettings
 
 releaseSettings
+
+def runTaskStep[A](task: TaskKey[A]) =
+  ReleaseStep(state => Project.extract(state).runTask(task, state)._1)
+
+ReleaseKeys.releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  runTaskStep(PgpKeys.publishSigned),
+  setNextVersion,
+  commitNextVersion,
+  runTaskStep(SonatypeKeys.sonatypeReleaseAll),
+  pushChanges
+)
 
 pomExtra := {
   <url>https://github.com/tkawachi/sbt-lock/</url>

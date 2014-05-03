@@ -44,10 +44,8 @@ object SbtLock {
     if (revisions.size == 1) revisions.head._1
     else {
       log.info(s"Multiple versions exist for ${artifact.organization} % ${artifact.name}:")
-      revisions.foreach {
-        case (rev, configs) =>
-          log.info(s"  * $rev in ${configs.mkString(",")}")
-      }
+      val foundVersions = revisions.keys.toList.sorted.mkString(", ")
+      log.info(s"  Found $foundVersions")
       val revision = latest(revisions.keys.toSet)
       log.info(s"  -> $revision is chosen.")
       revision

@@ -19,12 +19,26 @@ object SbtLockPlugin extends Plugin {
         val lockFileName = EvaluateTask.getSetting(sbtLockLockFile, DEFAULT_LOCK_FILE_NAME, extracted, buildStruct)
         val lockFile = new File(buildUnit.localBase, lockFileName)
 
+        val definedModules = buildUnit.defined.flatMap {
+          case (id, _) =>
+            val projectRef = ProjectRef(extracted.currentProject.base, id)
+            projectID.in(projectRef).get(buildStruct.data)
+        }.toList
+
+        def isDefinedModule(moduleId: ModuleID): Boolean = definedModules.exists { m =>
+          val binVer = scalaBinaryVersion.in(extracted.currentRef).get(buildStruct.data)
+          m.organization == moduleId.organization &&
+            // Better comparison for name with binary version?
+            (m.name == moduleId.name || binVer.exists(m.name + "_" + _ == moduleId.name)) &&
+            m.revision == moduleId.revision
+        }
+
         val allModules = buildUnit.defined.flatMap {
-          case (id, project) =>
+          case (id, _) =>
             val projectRef = ProjectRef(extracted.currentProject.base, id)
             // Evaluate update task then collect modules in result reports.
             EvaluateTask(buildStruct, update, state, projectRef).map(_._2) match {
-              case Some(Value(report)) => report.allModules
+              case Some(Value(report)) => report.allModules.filterNot(isDefinedModule)
               case _ => Seq.empty
             }
         }.toList

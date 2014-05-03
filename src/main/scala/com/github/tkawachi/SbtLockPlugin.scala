@@ -4,17 +4,51 @@ import sbt._
 import sbt.Keys._
 
 object SbtLockPlugin extends Plugin {
-  val lockFile = settingKey[File]("A version locking file.")
-  val lock = taskKey[Unit]("Create a version locking file.")
-  val unlock = taskKey[Unit]("Remove a version locking file.")
+  private val DEFAULT_LOCK_FILE_NAME = "lock.sbt"
 
-  override val projectSettings = Seq(
-    lockFile := baseDirectory { _ / "lock.sbt" }.value,
-    lock := SbtLock.doLock(update.value.allModules, lockFile.value, streams.value),
-    unlock := {
-      val f = lockFile.value
-      val deleted = f.delete()
-      if (deleted) streams.value.log.info(s"$f was deleted.")
-    }
+  val sbtLockLockFile = settingKey[String]("A version locking file name")
+
+  override val settings = Seq(
+    commands ++= Seq(
+      Command.command("lock") { state =>
+
+        val extracted = Project.extract(state)
+        val buildStruct: BuildStructure = extracted.structure
+        val buildUnit = buildStruct.units(buildStruct.root)
+
+        val lockFileName = EvaluateTask.getSetting(sbtLockLockFile, DEFAULT_LOCK_FILE_NAME, extracted, buildStruct)
+        val lockFile = new File(buildUnit.localBase, lockFileName)
+
+        val allModules = buildUnit.defined.flatMap {
+          case (id, project) =>
+            val projectRef = ProjectRef(extracted.currentProject.base, id)
+            // Evaluate update task then collect modules in result reports.
+            EvaluateTask(buildStruct, update, state, projectRef).map(_._2) match {
+              case Some(Value(report)) => report.allModules
+              case _ => Seq.empty
+            }
+        }.toList
+
+        SbtLock.doLock(allModules, lockFile, state.log)
+
+        "reload" :: state
+      },
+      Command.command("unlock") { state =>
+
+        val extracted = Project.extract(state)
+        val buildStruct = extracted.structure
+        val buildUnit = buildStruct.units(buildStruct.root)
+
+        val lockFileName = EvaluateTask.getSetting(sbtLockLockFile, DEFAULT_LOCK_FILE_NAME, extracted, buildStruct)
+        val lockFile = new File(buildUnit.localBase, lockFileName)
+
+        lockFile.delete()
+        "reload" :: state
+      },
+      Command.command("relock") { state =>
+        "unlock" :: "lock" :: state
+      }
+    ),
+    sbtLockLockFile := DEFAULT_LOCK_FILE_NAME
   )
 }

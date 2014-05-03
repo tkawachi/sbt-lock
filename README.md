@@ -1,4 +1,4 @@
-# sbt-lock
+# sbt-lock [![Build Status](https://secure.travis-ci.org/tkawachi/sbt-lock.png?branch=master)](http://travis-ci.org/tkawachi/sbt-lock)
 
 A sbt 0.13 plugin to create `lock.sbt` file which explicitly specifies
 versions of all dependent libraries.

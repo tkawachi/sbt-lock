@@ -1,0 +1,29 @@
+> lock
+$ exists lock.sbt
+$ exec cat lock.sbt
+> unlock
+$ absent lock.sbt
+
+> lock
+> checkExistsDependency "com.fasterxml.jackson.core" "jackson-core" "2.2.2"
+
+# https://github.com/json4s/json4s/blob/v.3.2.9_2.10/project/Dependencies.scala#L25
+
+> set libraryDependencies +="org.json4s"%%"json4s-jackson"%"3.2.9"
+> session save
+> checkExistsDependency "com.fasterxml.jackson.core" "jackson-core" "2.2.2"
+> checkAbsentDependency "com.fasterxml.jackson.core" "jackson-core" "2.3.1"
+
+> relock
+> checkAbsentDependency "com.fasterxml.jackson.core" "jackson-core" "2.2.2"
+> checkExistsDependency "com.fasterxml.jackson.core" "jackson-core" "2.3.1"
+
+> unlock
+
+> set sbtLockLockFile :="lock2.sbt"
+> session save
+> lock
+$ exists lock2.sbt
+$ absent lock.sbt
+> unlock
+$ absent lock2.sbt

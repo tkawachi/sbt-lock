@@ -21,5 +21,5 @@ InputKey[Unit]("checkExistsDependency") := {
 InputKey[Unit]("checkAbsentDependency") := {
   val module = complete.Parsers.spaceDelimited("").parsed
   val exists = check(module, dependencyOverrides.value)
-  assert(exists == false)
+  assert(!exists)
 }

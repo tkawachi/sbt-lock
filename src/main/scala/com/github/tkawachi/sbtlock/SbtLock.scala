@@ -86,8 +86,7 @@ object SbtLock {
         if (hashInFile != currentHash) {
           state.log.debug(s"hashInFile: $hashInFile, currentHash: $currentHash")
           state.log.info(s"libraryDependencies is updated after ${lockFile.name} was created.")
-          state.log.info(s"Run `lock` to update ${lockFile.name},")
-          state.log.info(s"Or run `relock` to create new ${lockFile.name}")
+          state.log.info(s"Run `lock` to update ${lockFile.name}, or `relock` to create a new one.")
         }
       case None =>
         if (lockFile.isFile) {

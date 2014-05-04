@@ -1,0 +1,8 @@
+# It doesn't create lock file when no libraryDependencies.
+> set libraryDependencies := Seq.empty
+> session save
+> lock
+$ absent lock.sbt
+
+# Unlock doesn't fail
+> unlock

@@ -7,16 +7,15 @@ import SbtLock.DEFAULT_LOCK_FILE_NAME
 object SbtLockPlugin extends Plugin {
   val sbtLockLockFile = settingKey[String]("A version locking file name")
 
-  override val settings = Seq(
+  override val globalSettings = Seq(
     commands ++= Seq(
       Command.command("lock") { state =>
 
         val extracted = Project.extract(state)
-        val buildStruct: BuildStructure = extracted.structure
+        val buildStruct = extracted.structure
         val buildUnit = buildStruct.units(buildStruct.root)
 
-        val lockFileName = EvaluateTask.getSetting(sbtLockLockFile, DEFAULT_LOCK_FILE_NAME, extracted, buildStruct)
-        val lockFile = new File(buildUnit.localBase, lockFileName)
+        val lockFile = SbtLock.lockFile(state)
 
         val definedModules = buildUnit.defined.flatMap {
           case (id, _) =>
@@ -45,7 +44,9 @@ object SbtLockPlugin extends Plugin {
           .filterNot(_.configurations.exists(_ == "scala-tool"))
           .toList
 
-        SbtLock.doLock(allModules, lockFile, state.log)
+        val depsHash = ModificationCheck.hashLibraryDependencies(state)
+
+        SbtLock.doLock(allModules, depsHash, lockFile, state.log)
 
         "reload" :: state
       },
@@ -65,6 +66,7 @@ object SbtLockPlugin extends Plugin {
         "unlock" :: "lock" :: state
       }
     ),
+    onLoad in Global ~= { _ compose SbtLock.checkDepUpdates },
     sbtLockLockFile := DEFAULT_LOCK_FILE_NAME
   )
 }

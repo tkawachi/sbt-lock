@@ -2,10 +2,9 @@ package com.github.tkawachi.sbtlock
 
 import sbt._
 import sbt.Keys._
+import SbtLock.DEFAULT_LOCK_FILE_NAME
 
 object SbtLockPlugin extends Plugin {
-  private val DEFAULT_LOCK_FILE_NAME = "lock.sbt"
-
   val sbtLockLockFile = settingKey[String]("A version locking file name")
 
   override val settings = Seq(

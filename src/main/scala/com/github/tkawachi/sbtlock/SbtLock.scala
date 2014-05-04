@@ -4,6 +4,7 @@ import org.apache.maven.artifact.versioning.ComparableVersion
 import sbt.{ Logger, IO, File, ModuleID }
 
 object SbtLock {
+  private[sbtlock] val DEFAULT_LOCK_FILE_NAME = "lock.sbt"
 
   case class Artifact(organization: String, name: String) {
     def sbtString(revision: String) =

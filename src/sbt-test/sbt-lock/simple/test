@@ -9,8 +9,8 @@ $ absent lock.sbt
 
 # https://github.com/json4s/json4s/blob/v.3.2.9_2.10/project/Dependencies.scala#L25
 
-> set libraryDependencies +="org.json4s"%%"json4s-jackson"%"3.2.9"
-> session save
+> addDependency "org.json4s" "json4s-jackson" "3.2.9"
+> reload
 > checkExistsDependency "com.fasterxml.jackson.core" "jackson-core" "2.2.2"
 > checkAbsentDependency "com.fasterxml.jackson.core" "jackson-core" "2.3.1"
 

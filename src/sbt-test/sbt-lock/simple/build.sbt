@@ -23,3 +23,10 @@ InputKey[Unit]("checkAbsentDependency") := {
   val exists = check(module, dependencyOverrides.value)
   assert(!exists, s"${module.mkString(":")} should not exist in dependencyOverrides: ${dependencyOverrides.value}")
 }
+
+InputKey[Unit]("addDependency") := {
+  val module = complete.Parsers.spaceDelimited("").parsed
+  val Seq(org, name, v) = module
+  val line = "libraryDependencies += \"" + org + "\" %% \"" + name + "\" % \"" + v + "\""
+  IO.append(new File(Keys.baseDirectory.value, "build.sbt"), "\n\n" + line)
+}

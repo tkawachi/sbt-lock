@@ -35,10 +35,10 @@ object SbtLockPlugin extends Plugin {
           case (id, _) =>
             val projectRef = ProjectRef(extracted.currentProject.base, id)
             // Evaluate update task then collect modules in result reports.
-            EvaluateTask(buildStruct, update, state, projectRef).map(_._2) match {
-              case Some(Value(report)) => report.allModules.filterNot(isDefinedModule)
+            EvaluateTask(buildStruct, update, state, projectRef).map {
+              case (_, Value(report)) => report.allModules.filterNot(isDefinedModule)
               case _ => Seq.empty
-            }
+            }.getOrElse(Seq.empty)
         }
           // Exclude dependencies in scala-tool configuration
           .filterNot(_.configurations.exists(_ == "scala-tool"))

@@ -55,7 +55,7 @@ object SbtLock {
     }
 
   def chooseRevision(artifact: Artifact, revisions: Map[String, Set[String]], log: Logger): String = {
-    if (revisions.size == 1) revisions.head._1
+    if (revisions.size == 1) revisions.head match { case (revision, _) => revision }
     else {
       log.info(s"Multiple versions exist for ${artifact.organization} % ${artifact.name}:")
       val foundVersions = revisions.keys.toList.sorted.mkString(", ")

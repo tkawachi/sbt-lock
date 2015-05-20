@@ -54,17 +54,16 @@ object SbtLock {
       None
     }
 
-  def chooseRevision(artifact: Artifact, revisions: Map[String, Set[String]], log: Logger): String = {
-    if (revisions.size == 1) revisions.head match { case (revision, _) => revision }
-    else {
-      log.info(s"Multiple versions exist for ${artifact.organization} % ${artifact.name}:")
-      val foundVersions = revisions.keys.toList.sorted.mkString(", ")
-      log.info(s"  Found $foundVersions")
-      val revision = latest(revisions.keys.toSet)
-      log.info(s"  -> $revision is chosen.")
-      revision
-    }
-  }
+  def chooseRevision(artifact: Artifact, revisions: Map[String, Set[String]], log: Logger): String =
+    revisions.headOption.map { case (revision, _) => revision }
+      .getOrElse {
+        log.info(s"Multiple versions exist for ${artifact.organization} % ${artifact.name}:")
+        val foundVersions = revisions.keys.toList.sorted.mkString(", ")
+        log.info(s"  Found $foundVersions")
+        val revision = latest(revisions.keys.toSet)
+        log.info(s"  -> $revision is chosen.")
+        revision
+      }
 
   def latest(revisions: Set[String]): String = revisions.maxBy(new ComparableVersion(_))
 

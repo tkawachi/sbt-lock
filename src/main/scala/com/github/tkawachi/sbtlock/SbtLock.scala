@@ -14,14 +14,18 @@ object SbtLock {
   }
 
   def doLock(allModules: Seq[ModuleID], depsHash: String, lockFile: File, log: Logger): Unit = {
-    val revisionsMap: Map[Artifact, Map[String, Set[String]]] =
-      allModules.groupBy { m =>
+    val revisionsMap: Map[Artifact, Map[String, Set[String]]] = {
+      // locking compiler related modules causes weird compilation errors.
+      val targetModules = allModules.filter(_.organization != "org.scala-lang")
+
+      targetModules.groupBy { m =>
         Artifact(m.organization, m.name)
       }.mapValues { modulesInArtifact =>
         modulesInArtifact.groupBy(_.revision).mapValues { modulesInRevision =>
-          modulesInRevision.map(_.configurations).flatten.toSet
+          modulesInRevision.flatMap(_.configurations).toSet
         }
       }
+    }
 
     val moduleLines = revisionsMap.map {
       case (artifact, revisions) =>

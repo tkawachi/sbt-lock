@@ -1,9 +1,16 @@
-// https://github.com/playframework/playframework/blob/2.2.3/framework/project/Dependencies.scala#L101
-libraryDependencies += "com.typesafe.play" %% "play" % "2.2.3"
+import sbt._
+
 
 resolvers += Resolver.typesafeRepo("releases")
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.8"
+
+libraryDependencies ++= Seq(
+  "org.yaml" % "snakeyaml" % "1.15",
+  "com.typesafe.play" %% "play" % "2.5.6", // use a guava 16
+  "com.google.guava" % "guava" % "15.0" force() //force  older version of guava
+)
+
 
 def check(module: Seq[String], dependencies: Set[ModuleID]): Boolean = {
   val Seq(org, name, v) = module

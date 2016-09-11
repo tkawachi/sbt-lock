@@ -5,6 +5,7 @@ $ exec cat lock.sbt
 $ absent lock.sbt
 
 > lock
+> reload
 > checkExistsDependency "com.fasterxml.jackson.core" "jackson-core" "2.2.2"
 
 # https://github.com/json4s/json4s/blob/v.3.2.9_2.10/project/Dependencies.scala#L25
@@ -14,12 +15,16 @@ $ absent lock.sbt
 > checkExistsDependency "com.fasterxml.jackson.core" "jackson-core" "2.2.2"
 > checkAbsentDependency "com.fasterxml.jackson.core" "jackson-core" "2.3.1"
 
-> relock
+> unlock
+> reload
+> lock
+> reload
 $ exec cat lock.sbt
 > checkAbsentDependency "com.fasterxml.jackson.core" "jackson-core" "2.2.2"
 > checkExistsDependency "com.fasterxml.jackson.core" "jackson-core" "2.3.1"
 
 > unlock
+> reload
 
 > set sbtLockLockFile :="lock2.sbt"
 > session save

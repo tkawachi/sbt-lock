@@ -4,15 +4,21 @@ import sbt._
 import sbt.Keys._
 import SbtLock.DEFAULT_LOCK_FILE_NAME
 
-object SbtLockPlugin extends Plugin {
-  val sbtLockLockFile = settingKey[String]("A version locking file name")
+object SbtLockPlugin extends AutoPlugin {
 
-  val createLockFile = taskKey[Unit]("Create lock.sbt file")
-  val deleteLockFile = taskKey[Unit]("Delete lock.sbt file")
-  val collectLockModuleIDs = taskKey[Seq[ModuleID]]("Collect ModuleIDs to lock")
+  override def trigger: PluginTrigger = AllRequirements
+
+  object autoImport {
+    val sbtLockLockFile = SbtLockKeys.sbtLockLockFile
+    val lock = SbtLockKeys.lock
+    val unlock = SbtLockKeys.unlock
+    val checkLockUpdate = SbtLockKeys.checkLockUpdate
+  }
+
+  import autoImport._
 
   override lazy val projectSettings = Seq(
-    collectLockModuleIDs := {
+    SbtLockKeys.collectLockModuleIDs := {
       val classpath: Seq[Attributed[File]] =
         Classpaths.managedJars(Compile, classpathTypes.value, update.value)
 
@@ -27,28 +33,47 @@ object SbtLockPlugin extends Plugin {
       }
     },
 
-    createLockFile := {
+    lock := {
       val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)
-      val allModules = collectLockModuleIDs.value
-      val depsHash = ModificationCheck.hash(allModules)
+      val allModules = SbtLockKeys.collectLockModuleIDs.value
+      val depsHash = ModificationCheck.hash((libraryDependencies in Compile).value)
       SbtLock.doLock(allModules, depsHash, lockFile, sLog.value)
     },
 
-    deleteLockFile := {
+    unlock := {
       val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)
       val deleted = lockFile.delete()
       if (!deleted) {
         sLog.value.warn(s"Failed to delete $lockFile")
       }
+    },
+
+    checkLockUpdate := {
+      val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)
+      val currentHash = ModificationCheck.hash((libraryDependencies in Compile).value)
+      SbtLock.readDepsHash(lockFile) match {
+        case Some(hashInFile) =>
+          if (hashInFile != currentHash) {
+            sLog.value.debug(s"hashInFile: $hashInFile, currentHash: $currentHash")
+            sLog.value.warn(s"libraryDependencies is updated after ${lockFile.name} was created.")
+            sLog.value.warn(s"Run `;unlock ;reload ;lock` to re-create ${lockFile.name}.")
+            sLog.value.warn(s"Run just `lock` instead if you want to keep existing library versions.")
+          } else {
+            sLog.value.info(s"${lockFile.name} is up to date.")
+          }
+        case None =>
+          if (lockFile.isFile) {
+            sLog.value.warn(s"${lockFile.name} seems to be created with old version of ${BuildInfo.name}.")
+            sLog.value.warn(s"Run `;unlock ;reload ;lock` to re-create ${lockFile.name}.")
+            sLog.value.warn(s"Run just `lock` instead if you want to keep existing library versions.")
+          } else if (!lockFile.exists()) {
+            sLog.value.info(s"${lockFile.name} doesn't exist. Run `lock` to create one.")
+          }
+      }
     }
   )
 
   override val globalSettings = Seq(
-    commands ++= Seq(
-      Command.command("lock")(state => "createLockFile" :: "reload" :: state),
-      Command.command("unlock")(state => "deleteLockFile" :: "reload" :: state),
-      Command.command("relock")(state => "unlock" :: "lock" :: state)
-    ),
     onLoad in Global ~= { _ compose SbtLock.checkDepUpdates },
     sbtLockLockFile := DEFAULT_LOCK_FILE_NAME
   )

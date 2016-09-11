@@ -11,7 +11,7 @@ object ModificationCheck {
    */
   def allLibraryDependencies(state: State): (State, Seq[ModuleID]) = {
     val extracted = Project.extract(state)
-    extracted.runTask(SbtLockPlugin.collectLockModuleIDs, state)
+    extracted.runTask(SbtLockKeys.collectLockModuleIDs, state)
   }
 
   /**

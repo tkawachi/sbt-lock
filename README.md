@@ -17,7 +17,7 @@ This plugin strictly specifies versions by `dependencyOverrides`.
 Add the following line to `~/.sbt/0.13/plugins/sbt-lock.sbt` or
 `project/plugins.sbt`.
 
-    addSbtPlugin("com.github.tkawachi" % "sbt-lock" % "0.2.3")
+    addSbtPlugin("com.github.tkawachi" % "sbt-lock" % "0.3.0")
 
 * `lock` to create `lock.sbt` file.
   `lock.sbt` includes `dependencyOverrides` for all dependent library versions.

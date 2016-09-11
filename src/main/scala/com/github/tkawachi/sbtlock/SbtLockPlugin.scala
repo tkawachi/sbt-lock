@@ -4,68 +4,76 @@ import sbt._
 import sbt.Keys._
 import SbtLock.DEFAULT_LOCK_FILE_NAME
 
-object SbtLockPlugin extends Plugin {
-  val sbtLockLockFile = settingKey[String]("A version locking file name")
+object SbtLockPlugin extends AutoPlugin {
+
+  override def trigger: PluginTrigger = AllRequirements
+
+  object autoImport {
+    val sbtLockLockFile = SbtLockKeys.sbtLockLockFile
+    val lock = SbtLockKeys.lock
+    val unlock = SbtLockKeys.unlock
+    val checkLockUpdate = SbtLockKeys.checkLockUpdate
+  }
+
+  import autoImport._
+
+  override lazy val projectSettings = Seq(
+    SbtLockKeys.collectLockModuleIDs := {
+      val classpath: Seq[Attributed[File]] =
+        Classpaths.managedJars(Compile, classpathTypes.value, update.value)
+
+      classpath.flatMap { entry =>
+        for {
+          art: Artifact <- entry.get(artifact.key)
+          mod: ModuleID <- entry.get(moduleID.key)
+        } yield {
+          sLog.value.debug(s"""[Lock] "${mod.organization}" % "${mod.name}" % "${mod.revision}"""")
+          mod
+        }
+      }
+    },
+
+    lock := {
+      val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)
+      val allModules = SbtLockKeys.collectLockModuleIDs.value
+      val depsHash = ModificationCheck.hash((libraryDependencies in Compile).value)
+      SbtLock.doLock(allModules, depsHash, lockFile, sLog.value)
+    },
+
+    unlock := {
+      val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)
+      val deleted = lockFile.delete()
+      if (!deleted) {
+        sLog.value.warn(s"Failed to delete $lockFile")
+      }
+    },
+
+    checkLockUpdate := {
+      val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)
+      val currentHash = ModificationCheck.hash((libraryDependencies in Compile).value)
+      SbtLock.readDepsHash(lockFile) match {
+        case Some(hashInFile) =>
+          if (hashInFile != currentHash) {
+            sLog.value.debug(s"hashInFile: $hashInFile, currentHash: $currentHash")
+            sLog.value.warn(s"libraryDependencies is updated after ${lockFile.name} was created.")
+            sLog.value.warn(s"Run `;unlock ;reload ;lock` to re-create ${lockFile.name}.")
+            sLog.value.warn(s"Run just `lock` instead if you want to keep existing library versions.")
+          } else {
+            sLog.value.info(s"${lockFile.name} is up to date.")
+          }
+        case None =>
+          if (lockFile.isFile) {
+            sLog.value.warn(s"${lockFile.name} seems to be created with old version of ${BuildInfo.name}.")
+            sLog.value.warn(s"Run `;unlock ;reload ;lock` to re-create ${lockFile.name}.")
+            sLog.value.warn(s"Run just `lock` instead if you want to keep existing library versions.")
+          } else if (!lockFile.exists()) {
+            sLog.value.info(s"${lockFile.name} doesn't exist. Run `lock` to create one.")
+          }
+      }
+    }
+  )
 
   override val globalSettings = Seq(
-    commands ++= Seq(
-      Command.command("lock") { state =>
-
-        val extracted = Project.extract(state)
-        val buildStruct = extracted.structure
-        val buildUnit = buildStruct.units(buildStruct.root)
-
-        val lockFile = SbtLock.lockFile(state)
-
-        val definedModules = buildUnit.defined.flatMap {
-          case (id, _) =>
-            val projectRef = ProjectRef(extracted.currentProject.base, id)
-            projectID.in(projectRef).get(buildStruct.data)
-        }.toList
-
-        def isDefinedModule(moduleId: ModuleID): Boolean = definedModules.exists { m =>
-          val binVer = scalaBinaryVersion.in(extracted.currentRef).get(buildStruct.data)
-          m.organization == moduleId.organization &&
-            // Better comparison for name with binary version?
-            (m.name == moduleId.name || binVer.exists(m.name + "_" + _ == moduleId.name)) &&
-            m.revision == moduleId.revision
-        }
-
-        val allModules = buildUnit.defined.flatMap {
-          case (id, _) =>
-            val projectRef = ProjectRef(extracted.currentProject.base, id)
-            // Evaluate update task then collect modules in result reports.
-            EvaluateTask(buildStruct, update, state, projectRef).map {
-              case (_, Value(report)) => report.allModules.filterNot(isDefinedModule)
-              case _ => Seq.empty
-            }.getOrElse(Seq.empty)
-        }
-          // Exclude dependencies in scala-tool configuration
-          .filterNot(_.configurations.exists(_ == "scala-tool"))
-          .toList
-
-        val depsHash = ModificationCheck.hashLibraryDependencies(state)
-
-        SbtLock.doLock(allModules, depsHash, lockFile, state.log)
-
-        "reload" :: state
-      },
-      Command.command("unlock") { state =>
-
-        val extracted = Project.extract(state)
-        val buildStruct = extracted.structure
-        val buildUnit = buildStruct.units(buildStruct.root)
-
-        val lockFileName = EvaluateTask.getSetting(sbtLockLockFile, DEFAULT_LOCK_FILE_NAME, extracted, buildStruct)
-        val lockFile = new File(buildUnit.localBase, lockFileName)
-
-        lockFile.delete()
-        "reload" :: state
-      },
-      Command.command("relock") { state =>
-        "unlock" :: "lock" :: state
-      }
-    ),
     onLoad in Global ~= { _ compose SbtLock.checkDepUpdates },
     sbtLockLockFile := DEFAULT_LOCK_FILE_NAME
   )

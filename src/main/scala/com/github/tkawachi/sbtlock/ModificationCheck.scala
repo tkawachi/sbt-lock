@@ -9,16 +9,9 @@ object ModificationCheck {
   /**
    * libraryDependencies in all projects and configurations
    */
-  def allLibraryDependencies(state: State): Seq[ModuleID] = {
+  def allLibraryDependencies(state: State): (State, Seq[ModuleID]) = {
     val extracted = Project.extract(state)
-    val buildStruct: BuildStructure = extracted.structure
-    val buildUnit = buildStruct.units(buildStruct.root)
-
-    buildUnit.defined.flatMap {
-      case (id, _) =>
-        val projectRef = ProjectRef(extracted.currentProject.base, id)
-        libraryDependencies.in(projectRef).get(buildStruct.data)
-    }.flatten.toList
+    extracted.runTask(SbtLockKeys.collectLockModuleIDs, state)
   }
 
   /**
@@ -33,8 +26,6 @@ object ModificationCheck {
       .mkString("\n")
     sha1(depsString, CHARSET)
   }
-
-  def hashLibraryDependencies(state: State): String = hash(allLibraryDependencies(state))
 
   private def formatID(m: ModuleID) = s"${m.organization}:${m.name}:${m.revision}"
 

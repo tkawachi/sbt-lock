@@ -1,6 +1,5 @@
 package com.github.tkawachi.sbtlock
 
-import org.apache.maven.artifact.versioning.ComparableVersion
 import sbt._
 import java.nio.charset.Charset
 
@@ -19,7 +18,9 @@ object SbtLock {
 
     val moduleLines = allModules
       .filter(m => m.organization != "org.scala-lang")
-      .map(mod => s"""  "${mod.organization}" % "${mod.name}" % "${mod.revision}"""").mkString(",\n")
+      .map(mod => s"""  "${mod.organization}" % "${mod.name}" % "${mod.revision}"""")
+      .sorted
+      .mkString(",\n")
 
     if (moduleLines.nonEmpty) {
       val dependencyOverrides =
@@ -42,7 +43,7 @@ object SbtLock {
     if (lockFile.isFile) {
       val charset = Charset.forName("UTF-8")
       val lines = IO.read(lockFile, charset).split("\n")
-      lines.find(_.startsWith(DEPS_HASH_PREFIX)).map(_.drop(DEPS_HASH_PREFIX.size))
+      lines.find(_.startsWith(DEPS_HASH_PREFIX)).map(_.drop(DEPS_HASH_PREFIX.length))
     } else {
       None
     }
@@ -58,7 +59,8 @@ object SbtLock {
 
   val checkDepUpdates = (state: State) => {
     val lockFile = SbtLock.lockFile(state)
-    val currentHash = ModificationCheck.hashLibraryDependencies(state)
+    val (state1, modules) = ModificationCheck.allLibraryDependencies(state)
+    val currentHash = ModificationCheck.hash(modules)
 
     readDepsHash(lockFile) match {
       case Some(hashInFile) =>
@@ -73,6 +75,6 @@ object SbtLock {
           state.log.info(s"Run `lock` to update ${lockFile.name},")
         }
     }
-    state
+    state1
   }
 }

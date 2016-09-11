@@ -1,0 +1,3 @@
+> lock
+> reload
+> checkExistsDependency "com.google.guava" "guava" "15.0"

@@ -23,4 +23,3 @@ Add the following line to `~/.sbt/0.13/plugins/sbt-lock.sbt` or
   `lock.sbt` includes `dependencyOverrides` for all dependent library versions.
   Manage it with version control system.
 * `unlock` to delete `lock.sbt` file.
-* `relock` to `unlock` then `lock`.

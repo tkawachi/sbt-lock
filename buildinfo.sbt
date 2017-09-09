@@ -1,6 +1,6 @@
-buildInfoSettings
+//buildInfoSettings
 
-sourceGenerators in Compile <+= buildInfo
+//sourceGenerators in Compile += buildInfo.taskValue
 
 val _url = settingKey[URL]("_url")
 

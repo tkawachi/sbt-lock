@@ -22,6 +22,7 @@ object SbtLock {
       .filter(m => m.organization != "org.scala-lang")
       .map(mod =>
         s"""  "${mod.organization}" % "${mod.name}" % "${mod.revision}"""")
+      .distinct
       .sorted
       .mkString(",\n")
 

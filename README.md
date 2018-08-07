@@ -32,7 +32,7 @@ Add the following line to `~/.sbt/0.13/plugins/sbt-lock.sbt` for sbt 0.13.x,
     import com.github.tkawachi.sbtlock._
 
     val settings: Seq[Setting[_]] = Seq(
-      SbtLockKeys.excludeDependencies := Seq(
+      excludeDependencies in SbtLockKeys.lock := Seq(
         "org.reactivemongo" % "reactivemongo-shaded-native"
       )
     )

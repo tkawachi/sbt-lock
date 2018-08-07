@@ -10,6 +10,7 @@ object SbtLockPlugin extends AutoPlugin {
 
   object autoImport {
     val sbtLockLockFile: SettingKey[String] = SbtLockKeys.sbtLockLockFile
+    val excludeDependencies: SettingKey[Seq[SbtExclusionRule]] = SbtLockKeys.excludeDependencies
     val lock: TaskKey[File] = SbtLockKeys.lock
     val unlock: TaskKey[Unit] = SbtLockKeys.unlock
     val checkLockUpdate: TaskKey[Unit] = SbtLockKeys.checkLockUpdate
@@ -27,6 +28,10 @@ object SbtLockPlugin extends AutoPlugin {
         for {
           art: Artifact <- entry.get(artifact.key)
           mod: ModuleID <- entry.get(moduleID.key)
+          if !excludeDependencies.value.exists { exclude =>
+            exclude.organization == mod.organization && exclude.name == "*" && { logger.debug(s"""[Skipped] "${mod.organization}" % "${mod.name}" % "${mod.revision}" because of exclude by organization"""); true } ||
+              exclude.organization == mod.organization && exclude.name == mod.name && { logger.debug(s"""[Skipped] "${mod.organization}" % "${mod.name}" % "${mod.revision}" because of exclude by organization/name"""); true }
+          }
         } yield {
           logger.debug(
             s"""[Lock] "${mod.organization}" % "${mod.name}" % "${mod.revision}"""")
@@ -83,5 +88,6 @@ object SbtLockPlugin extends AutoPlugin {
 
   override val globalSettings = Seq(
     onLoad in Global ~= { _ compose SbtLock.checkDepUpdates },
-    sbtLockLockFile := DEFAULT_LOCK_FILE_NAME)
+    sbtLockLockFile := DEFAULT_LOCK_FILE_NAME,
+    excludeDependencies := Seq.empty)
 }

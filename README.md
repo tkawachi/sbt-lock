@@ -23,3 +23,16 @@ Add the following line to `~/.sbt/0.13/plugins/sbt-lock.sbt` for sbt 0.13.x,
   `lock.sbt` includes `dependencyOverrides` for all dependent library versions.
   Manage it with version control system.
 * `unlock` to delete `lock.sbt` file.
+
+## Settings
+
+* `excludeDependencies` could be used to exclude some dependencies from locking. This could be required for platform-specific dependencies (e.g. Netty native)
+
+
+    import com.github.tkawachi.sbtlock._
+
+    val settings: Seq[Setting[_]] = Seq(
+      SbtLockKeys.excludeDependencies := Seq(
+        "org.reactivemongo" % "reactivemongo-shaded-native"
+      )
+    )

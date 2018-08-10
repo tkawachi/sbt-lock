@@ -18,7 +18,7 @@ Add the following line to `~/.sbt/0.13/plugins/sbt-lock.sbt` for sbt 0.13.x,
 `~/.sbt/1.0/plugins/sbt-lock.sbt` for sbt 1.0.x or `project/plugins.sbt`.
 
 ```
-addSbtPlugin("com.github.tkawachi" % "sbt-lock" % "0.4.2")
+addSbtPlugin("com.github.tkawachi" % "sbt-lock" % "0.5.0")
 ```
 
 * `lock` to create `lock.sbt` file.

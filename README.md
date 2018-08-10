@@ -17,7 +17,9 @@ This plugin strictly specifies versions by `dependencyOverrides`.
 Add the following line to `~/.sbt/0.13/plugins/sbt-lock.sbt` for sbt 0.13.x,
 `~/.sbt/1.0/plugins/sbt-lock.sbt` for sbt 1.0.x or `project/plugins.sbt`.
 
-    addSbtPlugin("com.github.tkawachi" % "sbt-lock" % "0.4.2")
+```
+addSbtPlugin("com.github.tkawachi" % "sbt-lock" % "0.4.2")
+```
 
 * `lock` to create `lock.sbt` file.
   `lock.sbt` includes `dependencyOverrides` for all dependent library versions.
@@ -28,11 +30,12 @@ Add the following line to `~/.sbt/0.13/plugins/sbt-lock.sbt` for sbt 0.13.x,
 
 * `excludeDependencies` could be used to exclude some dependencies from locking. This could be required for platform-specific dependencies (e.g. Netty native)
 
+```
+import com.github.tkawachi.sbtlock._
 
-    import com.github.tkawachi.sbtlock._
-
-    val settings: Seq[Setting[_]] = Seq(
-      excludeDependencies in SbtLockKeys.lock := Seq(
-        "org.reactivemongo" % "reactivemongo-shaded-native"
-      )
-    )
+val settings: Seq[Setting[_]] = Seq(
+  excludeDependencies in SbtLockKeys.lock := Seq(
+    "org.reactivemongo" % "reactivemongo-shaded-native"
+  )
+)
+```

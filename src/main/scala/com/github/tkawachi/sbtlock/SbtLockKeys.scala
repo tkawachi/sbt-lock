@@ -8,4 +8,6 @@ object SbtLockKeys {
   val unlock = taskKey[Unit]("Delete a version locking file for sbt-lock")
   val collectLockModuleIDs = taskKey[Seq[ModuleID]]("Collect ModuleIDs to lock")
   val checkLockUpdate = taskKey[Unit]("Check whether a version locking file needs update")
+  val sbtLockHashIsUpToDate = settingKey[Boolean]("lock.sbt file is up to date with libraryDependencies.")
+  val sbtLockIgnoreOverridesOnStaleHash = settingKey[Boolean]("When libraryDependencies are changed, ignores the lock.sbt file.")
 }

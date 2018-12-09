@@ -1,0 +1,14 @@
+> lock
+
+# Precondition: jackson is inherited from transitiveProject.
+> reload
+> thisProject/checkExistsDependencyClasspath "com.fasterxml.jackson.core" "jackson-core" "2.2.2"
+
+# Update the jackson version in transitiveProject
+$ delete transitiveProject/build.sbt
+$ copy-file transitiveProject/build.sbt.changed.txt transitiveProject/build.sbt
+
+# Stale lock.sbt hash should suppress the dependencyOverrides.
+> reload
+> thisProject/checkExistsDependencyClasspath "com.fasterxml.jackson.core" "jackson-core" "2.2.3"
+> thisProject/checkAbsentDependencyClasspath "com.fasterxml.jackson.core" "jackson-core" "2.2.2"

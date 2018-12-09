@@ -13,9 +13,17 @@ object SbtLockPlugin extends AutoPlugin {
     val lock: TaskKey[File] = SbtLockKeys.lock
     val unlock: TaskKey[Unit] = SbtLockKeys.unlock
     val checkLockUpdate: TaskKey[Unit] = SbtLockKeys.checkLockUpdate
+    val sbtLockHashIsUpToDate: SettingKey[Boolean] = SbtLockKeys.sbtLockHashIsUpToDate
+    val sbtLockIgnoreOverridesOnStaleHash: SettingKey[Boolean] = SbtLockKeys.sbtLockIgnoreOverridesOnStaleHash
   }
 
   import autoImport._
+
+  override def buildSettings: Seq[Def.Setting[_]] = {
+    Seq(
+      sbtLockHashIsUpToDate := true, // Initially assume all projects are up to date. projectSettings may flip this to false.
+      sbtLockIgnoreOverridesOnStaleHash := false)
+  }
 
   override lazy val projectSettings = Seq(
     SbtLockKeys.collectLockModuleIDs := {
@@ -51,6 +59,32 @@ object SbtLockPlugin extends AutoPlugin {
       if (!deleted) {
         logger.warn(s"Failed to delete $lockFile")
       }
+    },
+    sbtLockHashIsUpToDate := {
+      val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)
+      val maybeLockedHash = SbtLock.readDepsHash(lockFile)
+      def currentHash: String = ModificationCheck.hash((libraryDependencies in Compile).value)
+      maybeLockedHash == Some(currentHash)
+    },
+    (sbtLockHashIsUpToDate in ThisBuild) := {
+      /**
+       * Roll up all the projects across the whole build.
+       * When libraryDependencies change in any project, all lock.sbt files across all projects are potentially invalid.
+       *
+       * Consider:
+       * {{{
+       *   val thisProject = project.dependsOn(otherProject)
+       * }}}
+       *
+       * Looking at thisProject.sbtLockIsUpToDate is not enough to determine
+       * if "sbt ;unlock;reload;lock" would produce different hashes, since
+       * libraryDependencies of otherProject may have changed.
+       *
+       * Hypothetically, we could do this more granularly over just the current project's
+       * project dependency tree (including transitive ones),
+       * but I don't know how to do that in sbt.
+       */
+      (sbtLockHashIsUpToDate in ThisBuild).value && sbtLockHashIsUpToDate.value
     },
     checkLockUpdate := {
       val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)

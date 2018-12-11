@@ -3,6 +3,8 @@
 # Precondition: jackson is inherited from transitiveProject.
 > reload
 > thisProject/checkExistsDependencyClasspath "com.fasterxml.jackson.core" "jackson-core" "2.2.2"
+> thisProject/assertSbtLockHashIsUpToDate
+> thisProject/assertSbtLockHashIsUpToDateInThisBuild
 
 # Update the jackson version in transitiveProject
 $ delete transitiveProject/build.sbt
@@ -12,3 +14,9 @@ $ copy-file transitiveProject/build.sbt.changed.txt transitiveProject/build.sbt
 > reload
 > thisProject/checkExistsDependencyClasspath "com.fasterxml.jackson.core" "jackson-core" "2.2.3"
 > thisProject/checkAbsentDependencyClasspath "com.fasterxml.jackson.core" "jackson-core" "2.2.2"
+
+# hash of thisProject has not changed:
+> thisProject/assertSbtLockHashIsUpToDate
+
+# but a hash of its dependency has changed:
+-> thisProject/assertSbtLockHashIsUpToDateInThisBuild

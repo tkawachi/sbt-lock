@@ -91,6 +91,7 @@ object SbtLockPlugin extends AutoPlugin {
       val currentHash =
         ModificationCheck.hash((libraryDependencies in Compile).value)
       val logger = sLog.value
+      val ignoreOnStaleHash = sbtLockIgnoreOverridesOnStaleHash.value
       SbtLock.readDepsHash(lockFile) match {
         case Some(hashInFile) =>
           if (hashInFile != currentHash) {
@@ -101,6 +102,10 @@ object SbtLockPlugin extends AutoPlugin {
               s"Run `;unlock ;reload ;lock` to re-create ${lockFile.name}.")
             logger.warn(
               s"Run just `lock` instead if you want to keep existing library versions.")
+            if (ignoreOnStaleHash) {
+              logger.warn(
+                "Ignoring locked versions because sbtLockIgnoreOverridesOnStaleHash := true.")
+            }
           } else {
             logger.info(s"${lockFile.name} is up to date.")
           }

@@ -22,3 +22,17 @@ InputKey[Unit]("checkAbsentDependencyClasspath") := {
     s"${module.mkString(":")} should not exist in dependencyClasspath: ${(dependencyClasspath in Compile).value}"
   )
 }
+
+TaskKey[Unit]("assertSbtLockHashIsUpToDate") := {
+  assert(
+    sbtLockHashIsUpToDate.value,
+    s"sbtLockHashIsUpToDate.value was not true"
+  )
+}
+
+TaskKey[Unit]("assertSbtLockHashIsUpToDateInThisBuild") := {
+  assert(
+    (sbtLockHashIsUpToDate in ThisBuild).value,
+    s"(sbtLockHashIsUpToDate in ThisBuild).value was not true"
+  )
+}

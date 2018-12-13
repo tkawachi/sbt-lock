@@ -25,17 +25,23 @@ addSbtPlugin("com.github.tkawachi" % "sbt-lock" % "0.5.0")
   `lock.sbt` includes `dependencyOverrides` for all dependent library versions.
   Manage it with version control system.
 * `unlock` to delete `lock.sbt` file.
+* `checkLockUpdate` to print whether the lock file needs an update.
 
 ## Settings
 
 * `excludeDependencies` could be used to exclude some dependencies from locking. This could be required for platform-specific dependencies (e.g. Netty native)
 
-```
-import com.github.tkawachi.sbtlock._
+    ```
+    import com.github.tkawachi.sbtlock._
+    
+    val settings: Seq[Setting[_]] = Seq(
+      excludeDependencies in SbtLockKeys.lock := Seq(
+        "org.reactivemongo" % "reactivemongo-shaded-native"
+      )
+    )
+    ```
 
-val settings: Seq[Setting[_]] = Seq(
-  excludeDependencies in SbtLockKeys.lock := Seq(
-    "org.reactivemongo" % "reactivemongo-shaded-native"
-  )
-)
-```
+* `sbtLockIgnoreOverridesOnStaleHash := true` (default: `false`) makes `libraryDependencies` 
+    changes to take effect on reload, even without a `;unlock;reload;lock` cycle.
+    
+    Enabling is useful to match expectations of 1. update library dependencies, 2. reload, 3. see changes immediately.

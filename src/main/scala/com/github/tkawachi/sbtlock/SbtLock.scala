@@ -21,7 +21,7 @@ object SbtLock {
     val moduleLines = allModules
       .filter(m => m.organization != "org.scala-lang")
       .map(mod =>
-        s""""${mod.organization}" % "${mod.name}" % "${mod.revision}"""")
+        s""""${mod.organization}" % "${mod.name}" % "${mod.extraAttributes.getOrElse("version", mod.revision)}"""")
       .distinct
       .sorted
 

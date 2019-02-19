@@ -38,7 +38,8 @@ object SbtLock {
          |    )
          |  }
          |}
-         |${SbtLock.DEPS_HASH_PREFIX}${depsHash}""".stripMargin
+         |${SbtLock.DEPS_HASH_PREFIX}${depsHash}
+         |""".stripMargin
 
     IO.write(lockFile, dependencyOverrides)
     log.info(s"$lockFile was created. Commit it to version control system.")

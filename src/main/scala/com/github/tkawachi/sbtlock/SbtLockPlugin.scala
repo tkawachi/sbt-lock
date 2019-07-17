@@ -29,7 +29,7 @@ object SbtLockPlugin extends AutoPlugin {
     SbtLockKeys.collectLockModuleIDs := {
       val classpath: Seq[Attributed[File]] =
         Classpaths.managedJars(Compile, classpathTypes.value, update.value)
-      val logger = sLog.value
+      val logger = streams.value.log
 
       classpath.flatMap { entry =>
         for {
@@ -50,12 +50,12 @@ object SbtLockPlugin extends AutoPlugin {
       val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)
       val allModules = SbtLockKeys.collectLockModuleIDs.value
       val depsHash = ModificationCheck.hash((libraryDependencies in Compile).value)
-      SbtLock.doLock(allModules, depsHash, lockFile, sLog.value)
+      SbtLock.doLock(allModules, depsHash, lockFile, streams.value.log)
     },
     unlock := {
       val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)
       val deleted = lockFile.delete()
-      val logger = sLog.value
+      val logger = streams.value.log
       if (!deleted) {
         logger.warn(s"Failed to delete $lockFile")
       }
@@ -90,14 +90,14 @@ object SbtLockPlugin extends AutoPlugin {
       val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)
       val currentHash =
         ModificationCheck.hash((libraryDependencies in Compile).value)
-      val logger = sLog.value
+      val logger = streams.value.log
       val ignoreOnStaleHash = sbtLockIgnoreOverridesOnStaleHash.value
       SbtLock.readDepsHash(lockFile) match {
         case Some(hashInFile) =>
           if (hashInFile != currentHash) {
-            logger.debug(s"hashInFile: $hashInFile, currentHash: $currentHash")
+            logger.debug(s"[${name.value}] hashInFile: $hashInFile, currentHash: $currentHash")
             logger.warn(
-              s"libraryDependencies is updated after ${lockFile.name} was created.")
+              s"[${name.value}] libraryDependencies is updated after ${lockFile.name} was created.")
             logger.warn(
               s"Run `;unlock ;reload ;lock` to re-create ${lockFile.name}.")
             logger.warn(
@@ -112,14 +112,14 @@ object SbtLockPlugin extends AutoPlugin {
         case None =>
           if (lockFile.isFile) {
             logger.warn(
-              s"${lockFile.name} seems to be created with old version of ${BuildInfo.name}.")
+              s"[${name.value}] ${lockFile.name} seems to be created with old version of ${BuildInfo.name}.")
             logger.warn(
               s"Run `;unlock ;reload ;lock` to re-create ${lockFile.name}.")
             logger.warn(
               s"Run just `lock` instead if you want to keep existing library versions.")
           } else if (!lockFile.exists()) {
             logger.info(
-              s"${lockFile.name} doesn't exist. Run `lock` to create one.")
+              s"[${name.value}] ${lockFile.name} doesn't exist. Run `lock` to create one.")
           }
       }
     })

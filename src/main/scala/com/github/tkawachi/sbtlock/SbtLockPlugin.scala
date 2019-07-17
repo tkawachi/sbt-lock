@@ -92,12 +92,14 @@ object SbtLockPlugin extends AutoPlugin {
         ModificationCheck.hash((libraryDependencies in Compile).value)
       val logger = streams.value.log
       val ignoreOnStaleHash = sbtLockIgnoreOverridesOnStaleHash.value
+      val projectName = name.value
+
       SbtLock.readDepsHash(lockFile) match {
         case Some(hashInFile) =>
           if (hashInFile != currentHash) {
-            logger.debug(s"[${name.value}] hashInFile: $hashInFile, currentHash: $currentHash")
+            logger.debug(s"[$projectName] hashInFile: $hashInFile, currentHash: $currentHash")
             logger.warn(
-              s"[${name.value}] libraryDependencies is updated after ${lockFile.name} was created.")
+              s"[$projectName] libraryDependencies is updated after ${lockFile.name} was created.")
             logger.warn(
               s"Run `;unlock ;reload ;lock` to re-create ${lockFile.name}.")
             logger.warn(
@@ -112,14 +114,14 @@ object SbtLockPlugin extends AutoPlugin {
         case None =>
           if (lockFile.isFile) {
             logger.warn(
-              s"[${name.value}] ${lockFile.name} seems to be created with old version of ${BuildInfo.name}.")
+              s"[$projectName] ${lockFile.name} seems to be created with old version of ${BuildInfo.name}.")
             logger.warn(
               s"Run `;unlock ;reload ;lock` to re-create ${lockFile.name}.")
             logger.warn(
               s"Run just `lock` instead if you want to keep existing library versions.")
           } else if (!lockFile.exists()) {
             logger.info(
-              s"[${name.value}] ${lockFile.name} doesn't exist. Run `lock` to create one.")
+              s"[$projectName] ${lockFile.name} doesn't exist. Run `lock` to create one.")
           }
       }
     })

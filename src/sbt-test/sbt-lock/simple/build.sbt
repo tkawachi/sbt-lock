@@ -14,18 +14,18 @@ def check(module: Seq[String], dependencies: Set[ModuleID]): Boolean = {
 
 InputKey[Unit]("checkExistsDependency") := {
   val module = complete.Parsers.spaceDelimited("").parsed
-  val exists = check(module, dependencyOverrides.value.toSet)
+  val exists = check(module, (dependencyOverrides in Compile).value.toSet)
   assert(
     exists,
-    s"${module.mkString(":")} should exist in dependencyOverrides: ${dependencyOverrides.value}")
+    s"${module.mkString(":")} should exist in dependencyOverrides: ${(dependencyOverrides in Compile).value}")
 }
 
 InputKey[Unit]("checkAbsentDependency") := {
   val module = complete.Parsers.spaceDelimited("").parsed
-  val exists = check(module, dependencyOverrides.value.toSet)
+  val exists = check(module, (dependencyOverrides in Compile).value.toSet)
   assert(
     !exists,
-    s"${module.mkString(":")} should not exist in dependencyOverrides: ${dependencyOverrides.value}")
+    s"${module.mkString(":")} should not exist in dependencyOverrides: ${(dependencyOverrides in Compile).value}")
 }
 
 InputKey[Unit]("addDependency") := {

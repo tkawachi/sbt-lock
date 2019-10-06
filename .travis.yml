@@ -1,17 +1,13 @@
+dist: xenial
 language: scala
+jdk: openjdk8
 matrix:
   include:
-  - env: SBT_VERSION="0.13.16"
-    jdk: openjdk7
-  - env: SBT_VERSION="1.0.1"
-    jdk: oraclejdk8
-script: sbt "^^ ${SBT_VERSION}" test scripted
+  - env: SBT_VERSION="0.13.18"
+  - env: SBT_VERSION="1.2.8"
+script:
+  - sbt "^^ ${SBT_VERSION}" test scripted
 cache:
   directories:
   - "$HOME/.ivy2/cache"
   - "$HOME/.sbt/launchers"
-sudo: false
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer

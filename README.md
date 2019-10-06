@@ -1,4 +1,4 @@
-# sbt-lock [![Build Status](https://secure.travis-ci.org/tkawachi/sbt-lock.png?branch=master)](http://travis-ci.org/tkawachi/sbt-lock) [![Stories in Ready](https://badge.waffle.io/tkawachi/sbt-lock.png?label=ready&title=Ready)](https://waffle.io/tkawachi/sbt-lock)
+# sbt-lock [![Build Status](https://secure.travis-ci.org/tkawachi/sbt-lock.png?branch=master)](http://travis-ci.org/tkawachi/sbt-lock)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/6f20cdcdf27d4e8a9cbbe47385382c44)](https://www.codacy.com/app/tkawachi/sbt-lock?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=tkawachi/sbt-lock&amp;utm_campaign=Badge_Grade)
 
 A sbt 0.13 plugin to create `lock.sbt` file which explicitly specifies

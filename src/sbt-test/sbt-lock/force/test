@@ -1,3 +1,4 @@
 > lock
 > reload
 > checkExistsDependency "com.google.guava" "guava" "15.0"
+> checkExistsTestDependency "org.junit.jupiter" "junit-jupiter-engine" "5.5.2"

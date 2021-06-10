@@ -49,7 +49,11 @@ object SbtLockPlugin extends AutoPlugin {
     lock := {
       val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)
       val allModules = SbtLockKeys.collectLockModuleIDs.value
-      val depsHash = ModificationCheck.hash((libraryDependencies in Compile).value)
+      val excludes = (excludeDependencies in lock).value
+      val depsHash = ModificationCheck.hash((libraryDependencies in Compile).value.filterNot(dependency =>
+        excludes.exists(exclude =>
+          exclude.organization == dependency.organization && exclude.name == "*" ||
+            exclude.organization == dependency.organization && exclude.name == dependency.name)))
       SbtLock.doLock(allModules, depsHash, lockFile, streams.value.log)
     },
     unlock := {

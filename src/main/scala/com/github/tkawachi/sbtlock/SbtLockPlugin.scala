@@ -131,7 +131,7 @@ object SbtLockPlugin extends AutoPlugin {
     sbtLockLockFile := DEFAULT_LOCK_FILE_NAME,
     excludeDependencies in lock := Seq.empty)
 
-  def moduleListToHash = Def.task {
+  def moduleListToHash = Def.setting {
     val excludes = (excludeDependencies in lock).value
     (libraryDependencies in Compile).value
       .filterNot(dependency =>

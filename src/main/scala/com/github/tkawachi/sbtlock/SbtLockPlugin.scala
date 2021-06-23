@@ -49,7 +49,7 @@ object SbtLockPlugin extends AutoPlugin {
     lock := {
       val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)
       val allModules = SbtLockKeys.collectLockModuleIDs.value
-      val depsHash = ModificationCheck.hash((libraryDependencies in Compile).value)
+      val depsHash = ModificationCheck.hash(moduleListToHash.value)
       SbtLock.doLock(allModules, depsHash, lockFile, streams.value.log)
     },
     unlock := {
@@ -63,7 +63,7 @@ object SbtLockPlugin extends AutoPlugin {
     sbtLockHashIsUpToDate := {
       val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)
       val maybeLockedHash = SbtLock.readDepsHash(lockFile)
-      def currentHash: String = ModificationCheck.hash((libraryDependencies in Compile).value)
+      def currentHash: String = ModificationCheck.hash(moduleListToHash.value)
       maybeLockedHash == Some(currentHash)
     },
     (sbtLockHashIsUpToDate in ThisBuild) := {
@@ -89,7 +89,7 @@ object SbtLockPlugin extends AutoPlugin {
     checkLockUpdate := {
       val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)
       val currentHash =
-        ModificationCheck.hash((libraryDependencies in Compile).value)
+        ModificationCheck.hash(moduleListToHash.value)
       val logger = streams.value.log
       val ignoreOnStaleHash = sbtLockIgnoreOverridesOnStaleHash.value
       val projectName = name.value
@@ -130,4 +130,13 @@ object SbtLockPlugin extends AutoPlugin {
     onLoad in Global ~= { _ compose SbtLock.checkDepUpdates },
     sbtLockLockFile := DEFAULT_LOCK_FILE_NAME,
     excludeDependencies in lock := Seq.empty)
+
+  def moduleListToHash = Def.task {
+    val excludes = (excludeDependencies in lock).value
+    (libraryDependencies in Compile).value
+      .filterNot(dependency =>
+        excludes.exists(exclude =>
+          exclude.organization == dependency.organization && exclude.name == "*" ||
+            exclude.organization == dependency.organization && exclude.name == dependency.name))
+  }
 }

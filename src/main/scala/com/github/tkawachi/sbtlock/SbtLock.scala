@@ -53,6 +53,7 @@ object SbtLock {
       lines
         .find(_.startsWith(DEPS_HASH_PREFIX))
         .map(_.drop(DEPS_HASH_PREFIX.length))
+        .map(_.trim)
     } else {
       None
     }

@@ -27,11 +27,13 @@ object SbtLockPlugin extends AutoPlugin {
 
   override lazy val projectSettings = Seq(
     SbtLockKeys.collectLockModuleIDs := {
-      val classpath: Seq[Attributed[File]] =
+      val compileClasspath: Seq[Attributed[File]] =
         Classpaths.managedJars(Compile, classpathTypes.value, update.value)
+      val testClasspath: Seq[Attributed[File]] =
+        Classpaths.managedJars(Test, classpathTypes.value, update.value)
       val logger = streams.value.log
 
-      classpath.flatMap { entry =>
+      def filesToModules(classpath: Seq[Attributed[File]]): Seq[ModuleID] = classpath.flatMap { entry =>
         for {
           art: Artifact <- entry.get(artifact.key)
           mod: ModuleID <- entry.get(moduleID.key)
@@ -45,6 +47,17 @@ object SbtLockPlugin extends AutoPlugin {
           mod
         }
       }
+
+      val compileModules = filesToModules(compileClasspath)
+      //only add a module with test configuration if they exist in compileModules but with a different version
+      val testModules = filesToModules(testClasspath).filter {
+        testModule =>
+          compileModules.exists(compileModule =>
+            compileModule.organization == testModule.organization &&
+              compileModule.name == testModule.name &&
+              compileModule.revision != testModule.revision)
+      }.map(_.withConfigurations(Some(Test.name)))
+      compileModules ++ testModules
     },
     lock := {
       val lockFile = new File(baseDirectory.value, sbtLockLockFile.value)

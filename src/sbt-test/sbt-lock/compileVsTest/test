@@ -1,0 +1,7 @@
+> lock
+> reload
+$ exec cat lock.sbt
+> checkExistsDependency "com.fasterxml.jackson.core" "jackson-core" "2.2.2"
+> checkExistsDependency "com.fasterxml.jackson.core" "jackson-core" "2.2.3" "test"
+> checkAbsentDependency "com.fasterxml.jackson.core" "jackson-core" "2.2.2" "test"
+
